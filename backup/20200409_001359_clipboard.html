@@ -1,0 +1,279 @@
+﻿<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  <!-- Bootstrap CSS -->
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+    crossorigin="anonymous"
+  />
+  <!-- fontawesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"
+    integrity="sha256-UzFD2WYH2U1dQpKDjjZK72VtPeWP50NoJjd26rnAdUI="
+    crossorigin="anonymous"
+  />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+  <title>Clip4Win</title>
+  <style>
+    .header-title-text {
+      font-size: 5rem;
+      letter-spacing: -5px;
+      line-height: 140px;
+      font-weight: bold;
+      color: white;
+    }
+    .sticky_table thead th {
+      /* 縦スクロール時に固定する */
+      position: -webkit-sticky;
+      position: sticky;
+      top: -1px;
+      /* tbody内のセルより手前に表示する */
+      z-index: 10;
+      background-color: black;
+    }
+    .sticky_table tbody td span {
+      /* 縦スクロール時に固定する */
+      position: -webkit-sticky;
+      position: sticky;
+      top: 55px;
+      z-index: 9;
+    }
+    .cb-tr-clip:hover {
+      color: #ccc !important;
+    }
+    .cb-reload {
+      position: fixed;
+      bottom: 100px;
+      right: 100px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="container bg-dark text-white" onload="init()">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"
+  ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  <script>
+    function init() {
+      document.querySelectorAll(".cb-tr-clip").forEach(function (el) {
+        // console.log("innerHTML > " + el.getElementsByTagName("td")[1].innerHTML);
+        // console.log("innerText > " + el.getElementsByTagName("td")[1].innerText);
+        // console.log("textContent > " + el.getElementsByTagName("td")[1].textContent);
+        //el.getElementsByTagName("td")[1].textContent = escapeHtml(el.getElementsByTagName("td")[1].innerHTML);
+        el.getElementsByTagName("td")[1].dataset.text = el.getElementsByTagName("td")[1].innerText;
+        el.getElementsByTagName("td")[1].setAttribute("title", el.getElementsByTagName("td")[1].innerText);
+        el.getElementsByTagName("td")[1].innerText = tripleReader(el.getElementsByTagName("td")[1].innerText);
+        el.addEventListener("click", function () {
+          // console.log("click");
+          const text = el.getElementsByTagName("td")[1].dataset.text;
+          if (execCopy(text)) {
+            // alert("Copied!!");
+            toastr.options = {
+              positionClass: "toast-bottom-right",
+              timeOut: "2000",
+            };
+            toastr.success("Success to Copy");
+          } else if (window.getSelection) {
+            alert("Failed to copy...");
+          }
+        });
+      });
+      document.querySelector("#reload").addEventListener("click", function () {
+        window.location.reload();
+      });
+      var tbody = $("table tbody");
+      tbody.html($("tr", tbody).get().reverse());
+    }
+    /**
+     * コピー処理
+     */
+    function execCopy(string) {
+      // console.log("target string: " + string);
+      // 空div 生成
+      var tmp = document.createElement("div");
+      // 選択用のタグ生成
+      var pre = document.createElement("pre");
+
+      // 親要素のCSSで user-select: none だとコピーできないので書き換える
+      pre.style.webkitUserSelect = "auto";
+      pre.style.userSelect = "auto";
+
+      tmp.appendChild(pre).textContent = string;
+
+      // 要素を画面外へ
+      var s = tmp.style;
+      s.position = "fixed";
+      s.right = "200%";
+
+      // body に追加
+      document.body.appendChild(tmp);
+      // 要素を選択
+      document.getSelection().selectAllChildren(tmp);
+
+      // クリップボードにコピー
+      var result = document.execCommand("copy");
+
+      // 要素削除
+      document.body.removeChild(tmp);
+
+      return result;
+    }
+    function tripleReader(text, count) {
+      if (!count) count = 30; // default 20
+      if (text.length > count) {
+        text = text.split("\n")[0].substr(0, count) + "…";
+      }
+      return text;
+    }
+    // /**
+    //  * HTMLエスケープ処理
+    //  */
+    // function escapeHtml(string) {
+    //   if (typeof string !== "string") {
+    //     return string;
+    //   }
+    //   return string.replace(/[&'`"<>]/g, function (match) {
+    //     return {
+    //       "&": "&amp;",
+    //       "'": "&#x27;",
+    //       "`": "&#x60;",
+    //       '"': "&quot;",
+    //       "<": "&lt;",
+    //       ">": "&gt;",
+    //     }[match];
+    //   });
+    // }
+  </script>
+  <div class="d-flex align-items-center justify-content-center w-100" style="height: 200px;">
+    <h1 class="header-title-text">CLIPBOARD</h1>
+  </div>
+  <div class="cb-reload">
+    <div class="d-flex flex-column">
+      <i id="reload" class="fas fa-sync-alt fa-3x"></i>
+    </div>
+  </div>
+  <table class="w-100 table table-hover text-white cb-table-clip sticky_table table-sm">
+    <thead class="cb-th-clip">
+      <th style="width: 200px;">日付</th>
+      <th>コンテンツ</th>
+    </thead>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 21:50:26</span></td>
+      <td class="cb-copy-text">CLIPBOARD</td>
+    </tr>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 22:52:13</span></td>
+      <td>
+        Menu. お問い合わせ · 運営会社 · Home &gt; CDN &gt; 速度が遅いWEBサイトに潜む見えない脅威 ...
+        これをAmazonのような巨大なサイトを例にすると、1秒遅いことが年間約16億ドルの機会損失になるということ。
+        つまりたった1秒の差で16億ドル以上の利益を ...
+      </td>
+    </tr>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 22:52:35</span></td>
+      <td>
+        position: sticky を指定した要素は、一番近いscrolling ancestorに固定されます。scrolling ancestorとは、祖先要素のうち overflow:
+        hidden, scroll, auto, overlay な要素です。そのような要素が無い場合はビューポートと考えて良いでしょう。<br /><br />先ほどのテーブルを
+        overflow: scroll を指定した要素で囲めば、その要素内でスクロールしたときにヘッダーが上と左に固定されます。
+      </td>
+    </tr>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 22:52:49</span></td>
+      <td>
+        &lt;!doctype html&gt;<br />&lt;html lang=&quot;ja&quot;&gt;<br />
+        &lt;head&gt;<br />
+        &lt;!-- Required meta tags --&gt;<br />
+        &lt;meta charset=&quot;utf-8&quot;&gt;<br />
+        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, shrink-to-fit=no&quot;&gt;<br /><br />
+        &lt;!-- Bootstrap CSS --&gt;<br />
+        &lt;link rel=&quot;stylesheet&quot; href=&quot;https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css&quot;
+        integrity=&quot;sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T&quot;
+        crossorigin=&quot;anonymous&quot;&gt;<br /><br />
+        &lt;title&gt;Hello, world!&lt;/title&gt;<br />
+        &lt;/head&gt;<br />
+        &lt;body&gt;<br />
+        &lt;h1&gt;Hello, world!&lt;/h1&gt;<br /><br />
+        &lt;!-- Optional JavaScript --&gt;<br />
+        &lt;!-- jQuery first, then Popper.js, then Bootstrap JS --&gt;<br />
+        &lt;script src=&quot;https://code.jquery.com/jquery-3.3.1.slim.min.js&quot;
+        integrity=&quot;sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo&quot;
+        crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;<br />
+        &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js&quot;
+        integrity=&quot;sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1&quot;
+        crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;<br />
+        &lt;script src=&quot;https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js&quot;
+        integrity=&quot;sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM&quot;
+        crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;<br />
+        &lt;/body&gt;<br />&lt;/html&gt;
+      </td>
+    </tr>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 22:53:10</span></td>
+      <td>
+        ログイン後、しばらく操作をしないとログアウトします。<br />お手数ですが、再度ログインいただきますようお願いいたします。<br /><br /><br />≪ご注意≫<br />Cookieを許可する設定になっていないとログインできませんので<br />ご確認ください。　主なブラウザのCookie設定方法はこちら<br />
+      </td>
+    </tr>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 22:54:04</span></td>
+      <td>
+        Menu. お問い合わせ · 運営会社 · Home &gt; CDN &gt; 速度が遅いWEBサイトに潜む見えない脅威 ...
+        これをAmazonのような巨大なサイトを例にすると、1秒遅いことが年間約16億ドルの機会損失になるということ。
+        つまりたった1秒の差で16億ドル以上の利益を ...
+      </td>
+    </tr>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 22:54:29</span></td>
+      <td></td>
+    </tr>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 22:55:01</span></td>
+      <td>
+        Menu. お問い合わせ · 運営会社 · Home &gt; CDN &gt; 速度が遅いWEBサイトに潜む見えない脅威 ...
+        これをAmazonのような巨大なサイトを例にすると、1秒遅いことが年間約16億ドルの機会損失になるということ。
+        つまりたった1秒の差で16億ドル以上の利益を ...
+      </td>
+    </tr>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 22:55:07</span></td>
+      <td>
+        &lt;!doctype html&gt;<br />&lt;html lang=&quot;ja&quot;&gt;<br />&lt;head&gt;<br />&lt;!-- Required meta tags --&gt;<br />&lt;meta
+        charset=&quot;utf-8&quot;&gt;<br />&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1,
+        shrink-to-fit=no&quot;&gt;<br /><br />&lt;!-- Bootstrap CSS --&gt;<br />&lt;link rel=&quot;stylesheet&quot;
+        href=&quot;https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css&quot;
+        integrity=&quot;sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T&quot;
+        crossorigin=&quot;anonymous&quot;&gt;<br /><br />&lt;title&gt;Hello, world!&lt;/title&gt;<br />&lt;/head&gt;<br />&lt;body&gt;<br />&lt;h1&gt;Hello,
+        world!&lt;/h1&gt;<br /><br />&lt;!-- Optional JavaScript --&gt;<br />&lt;!-- jQuery first, then Popper.js, then Bootstrap JS
+        --&gt;<br />&lt;script src=&quot;https://code.jquery.com/jquery-3.3.1.slim.min.js&quot;
+        integrity=&quot;sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo&quot;
+        crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;<br />&lt;script
+        src=&quot;https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js&quot;
+        integrity=&quot;sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1&quot;
+        crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;<br />&lt;script
+        src=&quot;https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js&quot;
+        integrity=&quot;sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM&quot;
+        crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;<br />&lt;/body&gt;<br />&lt;/html&gt;
+      </td>
+    </tr>
+    <tr class="cb-tr-clip">
+      <td><span>2020/04/07 22:56:31</span></td>
+      <td>
+        &lt;link href=&quot;//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css&quot; rel=&quot;stylesheet&quot; /&gt;<br />&lt;script
+        src=&quot;//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js&quot;&gt;&lt;/script&gt;
+      </td>
+    </tr>
+  </table>
+</body>

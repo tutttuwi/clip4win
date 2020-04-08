@@ -31,7 +31,7 @@ while ($true) {
     $baseClipText = ${clipText}
     $baseClipText = ${baseClipText} -replace "&", "&amp;"
     $baseClipText = ${baseClipText} -replace "'", "&#x27;"
-    $baseClipText = ${baseClipText} -replace "``",  "&#x60;"
+    $baseClipText = ${baseClipText} -replace "``", "&#x60;"
     $baseClipText = ${baseClipText} -replace '"', "&quot;"
     $baseClipText = ${baseClipText} -replace "<", "&lt;"
     $baseClipText = ${baseClipText} -replace ">", "&gt;"
