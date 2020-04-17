@@ -14,6 +14,10 @@ so you can confirm history opening browser and copy text.
 
 That's all!!
 
+## sequence overview
+
+<img src="overview.png" style="width:60%">
+
 ## License
 
 MIT
