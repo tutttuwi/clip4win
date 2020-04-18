@@ -52,6 +52,51 @@
       right: 100px;
       cursor: pointer;
     }
+    input[type="checkbox"]{
+      display: none;
+    }
+    input[type="checkbox"] ~ label {
+      border: solid 1px #CCC;
+      overflow: hidden;
+      width: 50px;
+      white-space: nowrap;
+    }
+    input[type="checkbox"] ~ label::before {
+      content: "OFF";
+      cursor: pointer;
+      width: 50px;
+      text-align: center;
+      background-color: gray;
+      border-right: solid 10px #FFF;
+      display: inline-block;
+      transition-duration: 0.1s;
+      float: left;
+    }
+    input[type="checkbox"]:checked ~ label::before {
+      content: "OFF";
+      cursor: pointer;
+      display: inline-block;
+      transform: translate(-40px, 0px);
+    }
+
+    input[type="checkbox"] ~ label::after {
+      content: "ON";
+      cursor: pointer;
+      width: 50px;
+      text-align: center;
+      background-color: green;
+      border-right: solid 10px #FFF;
+      display: inline-block;
+      transition-duration: 0.1s;
+    }
+    input[type="checkbox"]:checked ~ label::after {
+      content: "ON";
+      cursor: pointer;
+      background-color: green;
+      display: inline-block;
+      transform: translate(-40px, 0px);
+    }
+
   </style>
 </head>
 <body class="container bg-dark text-white" onload="init()">
@@ -97,6 +142,28 @@
       });
       var tbody = $("table tbody");
       tbody.html($("tr", tbody).get().reverse());
+      
+      document.querySelector("#check").checked = localStorage.getItem("isChecked") == "false" ? false : true;
+      if (document.querySelector("#check").checked) {
+        setInterval(function() {
+          window.location.reload();
+        }, 10000);
+      }
+      document.querySelector("#check").addEventListener("change", function() {
+        let isChecked = document.querySelector("#check").checked;
+        console.log("isChecked:" + isChecked);
+        localStorage.setItem("isChecked",isChecked);
+        setTimeout(function(){window.location.reload();},1000);
+      });
+      
+//      document.querySelector(".js-change-persec").addEventListener("change", function() {
+//        let ps = Number(document.querySelector(".js-change-persec").value);
+//        if(!Number(ps)){
+//          return;
+//        }
+//        localstrage.setItem("persec",ps);
+//        toastr.success("Success to set Reload Span.");
+//      });
     }
     /**
      * コピー処理
@@ -163,6 +230,13 @@
   </div>
   <div class="cb-reload">
     <div class="d-flex flex-column">
+      <!--<div class="my-2">
+        <input type="text" class="form-control js-change-persec" style="width:50px;" placeholder="sec">
+      </div>-->
+      <div>
+        <input type="checkbox" id="check" />
+        <label for="check" title="Auto Reload (default: per 10seconds)"></label>
+      </div>
       <i id="reload" class="fas fa-sync-alt fa-3x"></i>
     </div>
   </div>
